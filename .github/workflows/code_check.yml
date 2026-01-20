@@ -18,7 +18,7 @@ jobs:
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/pip
 
     steps:
-      # Step 1: Checkout code (avoid archive)
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -45,16 +45,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl build-essential git tar
 
-      # Step 5: Upgrade pip & install pipenv
-      - name: Install pyenv
-        run: |
-          curl https://pyenv.run | bash
-          export PATH="$HOME/.pyenv/bin:$PATH"
-          eval "$(pyenv init --path)"
-          eval "$(pyenv init -)"
-          eval "$(pyenv virtualenv-init -)"
+      # Step 5: Install pipenv globally
+      - name: Install pipenv
+        run: python -m pip install --upgrade pip pipenv
 
-      # Step 6: Install project dependencies
+      # Step 6: Install project dependencies via your script
       - name: Install project dependencies
         run: ./scripts/install.sh
 
