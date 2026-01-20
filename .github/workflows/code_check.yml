@@ -16,57 +16,47 @@ jobs:
     env:
       PIPENV_VENV_IN_PROJECT: "1"
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/pip
-      PYENV_ROOT: ${{ github.workspace }}/.pyenv
-      PATH: ${{ github.workspace }}/.pyenv/bin:${{ github.workspace }}/.pyenv/shims:$PATH
 
     steps:
-      # Step 1: Checkout repository using git to avoid tar errors
+      # Step 1: Checkout code (avoid archive)
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Step 2: Install system dependencies for pyenv
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl build-essential git \
-            libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
-            libsqlite3-dev wget llvm libncurses5-dev libncursesw5-dev \
-            xz-utils tk-dev libffi-dev liblzma-dev
+      # Step 2: Install tar (fix extraction error)
+      - name: Install tar
+        run: sudo apt-get update && sudo apt-get install -y tar
 
-      # Step 3: Install pyenv
-      - name: Install pyenv
-        run: |
-          curl https://pyenv.run | bash
-          echo 'export PYENV_ROOT="${HOME}/.pyenv"' >> $GITHUB_ENV
-          echo 'export PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:$PATH"' >> $GITHUB_ENV
-          # Reload environment for current step
-          export PYENV_ROOT="${HOME}/.pyenv"
-          export PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:$PATH"
-          eval "$(pyenv init --path)"
-          eval "$(pyenv init -)"
-          pyenv --version
+      # Step 3: Setup Python 3.12
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
 
-      # Step 4: Install pipenv
-      - name: Install pipenv
-        run: python -m pip install --upgrade pip pipenv
-
-      # Step 5: Cache pipenv dependencies
-      - name: Cache pipenv
+      # Step 4: Cache pipenv virtual environment and pip cache
+      - name: Cache pipenv dependencies
         uses: actions/cache@v3
         with:
           path: |
             .venv
             .cache/pip
           key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pipenv-
 
-      # Step 6: Install project dependencies (pyenv is now available)
+      # Step 5: Install system dependencies
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y curl build-essential git
+
+      # Step 6: Upgrade pip & install pipenv
+      - name: Install pipenv
+        run: python -m pip install --upgrade pip pipenv
+
+      # Step 7: Install project dependencies
       - name: Install project dependencies
         run: ./scripts/install.sh
 
-      # Step 7: Run code checks
+      # Step 8: Run code checks via Makefile
       - name: Run code checks
         run: make check
