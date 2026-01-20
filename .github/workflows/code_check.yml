@@ -16,19 +16,37 @@ jobs:
     env:
       PIPENV_VENV_IN_PROJECT: "1"
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/pip
+      PYENV_ROOT: ${{ github.workspace }}/.pyenv
+      PATH: ${{ github.workspace }}/.pyenv/bin:${{ github.workspace }}/.pyenv/shims:${{ env.PATH }}
 
     steps:
       # Step 1: Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Setup Python and system dependencies in one go
-      - name: Setup Python and system dependencies
+      # Step 2: Setup Python system dependencies
+      - name: Install system dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y curl build-essential git
-          python -m pip install --upgrade pip pipenv
+          sudo apt-get update
+          sudo apt-get install -y curl build-essential git libssl-dev zlib1g-dev \
+            libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev \
+            libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev
 
-      # Step 3: Cache pipenv virtual environment and pip cache
+      # Step 3: Install pyenv
+      - name: Install pyenv
+        run: |
+          curl https://pyenv.run | bash
+          echo 'export PYENV_ROOT="${HOME}/.pyenv"' >> $GITHUB_ENV
+          echo 'export PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:$PATH"' >> $GITHUB_ENV
+          eval "$(pyenv init --path)"
+          eval "$(pyenv init -)"
+          pyenv --version
+
+      # Step 4: Install pipenv
+      - name: Install pipenv
+        run: python -m pip install --upgrade pip pipenv
+
+      # Step 5: Cache pipenv virtual environment and pip cache
       - name: Cache pipenv dependencies
         uses: actions/cache@v3
         with:
@@ -39,10 +57,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pipenv-
 
-      # Step 4: Install project dependencies
+      # Step 6: Install project dependencies (pyenv is now available)
       - name: Install project dependencies
         run: ./scripts/install.sh
 
-      # Step 5: Run code checks via Makefile
+      # Step 7: Run code checks
       - name: Run code checks
         run: make check
