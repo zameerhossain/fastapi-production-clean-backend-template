@@ -87,4 +87,4 @@ jobs:
       # Step 7: Run code checks
       - name: Run code checks
         shell: bash
-        run: make check
+        run: pipenv run make check
