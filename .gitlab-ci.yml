@@ -1,0 +1,29 @@
+stages:
+  - check
+
+variables:
+  PIPENV_VENV_IN_PROJECT: "1"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+code_check:
+  stage: check
+  image: python:3.12-slim
+  before_script:
+    # Install system dependencies
+    - apt-get update && apt-get install -y curl build-essential git
+    # Upgrade pip & install pipenv
+    - pip install --upgrade pip
+    - pip install pipenv
+    # Install project dependencies
+    - ./scripts/install.sh
+  script:
+    # Run all checks via Makefile
+    - make check
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .venv/
+      - .cache/pip
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'     # Run on merge requests
+    - if: '$CI_COMMIT_BRANCH'       # Run on branches

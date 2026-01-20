@@ -1,0 +1,31 @@
+# TODO need to work for aws
+version: 0.2
+
+env:
+  variables:
+    PROJECT_NAME: "tz-file-upload-download-service"
+    DOCKER_IMAGE: "tz-file-upload-download-service_app"
+    DOCKER_CONTAINER: "tz-file-upload-download-service_container"
+    ENV: "dev"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - echo "🔧 Installing pipenv..."
+      - pip install --upgrade pip
+      - pip install pipenv
+      - pipenv install --dev
+  pre_build:
+    commands:
+      - echo "🧹 Cleaning old Docker images..."
+      - docker system prune -f
+  build:
+    commands:
+      - echo "🐳 Building Docker image..."
+      - docker build -t $DOCKER_IMAGE .
+  post_build:
+    commands:
+      - echo "🚀 Running Docker container..."
+      - docker run -d -p 8000:8000 --name $DOCKER_CONTAINER $DOCKER_IMAGE
