@@ -18,25 +18,21 @@ jobs:
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/pip
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Step 2: Install pyenv build dependencies
-      - name: Install pyenv build dependencies
+      - name: Install pyenv dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential curl libssl-dev zlib1g-dev \
               libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev \
               libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev git tar
 
-      # Step 3: Install pyenv
       - name: Install pyenv
         run: curl https://pyenv.run | bash
 
-      # Step 4: Setup pyenv and install Python from .python-version
       - name: Setup Python via pyenv
         shell: bash
         run: |
@@ -51,10 +47,6 @@ jobs:
           # Install pipenv globally
           python -m pip install --upgrade pip pipenv
 
-          # Ensure pipenv is on PATH
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      # Step 5: Cache pipenv virtual environment and pip cache
       - name: Cache pipenv dependencies
         uses: actions/cache@v3
         with:
@@ -63,12 +55,13 @@ jobs:
             .cache/pip
           key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile.lock') }}
 
-      # Step 6: Install project dependencies via install.sh
       - name: Install project dependencies
         shell: bash
-        run: ./scripts/install.sh
+        run: |
+          # Ensure pipenv is on PATH for this step
+          export PATH="$HOME/.local/bin:$PATH"
+          ./scripts/install.sh
 
-      # Step 7: Run code checks via Makefile
       - name: Run code checks
         shell: bash
         run: make check
