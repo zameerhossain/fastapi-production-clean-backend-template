@@ -25,10 +25,10 @@ jobs:
           fetch-depth: 0
 
       # Step 2: Setup Python 3.12
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
+#      - name: Setup Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: 3.12
 
       # Step 3: Cache pipenv virtual environment and pip cache
       - name: Cache pipenv dependencies
