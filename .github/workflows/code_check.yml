@@ -46,8 +46,13 @@ jobs:
           sudo apt-get install -y curl build-essential git tar
 
       # Step 5: Upgrade pip & install pipenv
-      - name: Install pipenv
-        run: python -m pip install --upgrade pip pipenv
+      - name: Install pyenv
+        run: |
+          curl https://pyenv.run | bash
+          export PATH="$HOME/.pyenv/bin:$PATH"
+          eval "$(pyenv init --path)"
+          eval "$(pyenv init -)"
+          eval "$(pyenv virtualenv-init -)"
 
       # Step 6: Install project dependencies
       - name: Install project dependencies
