@@ -87,4 +87,11 @@ jobs:
       # Step 7: Run code checks
       - name: Run code checks
         shell: bash
-        run: pipenv run make check
+        run: |
+          export PYENV_ROOT="$HOME/.pyenv"
+          export PATH="$PYENV_ROOT/bin:$PATH:$HOME/.local/bin"
+          eval "$(pyenv init -)"
+          eval "$(pyenv virtualenv-init -)"
+          
+          # Run make commands inside pipenv
+          pipenv run make check
