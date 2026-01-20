@@ -18,21 +18,27 @@ jobs:
       PIP_CACHE_DIR: ${{ github.workspace }}/.cache/pip
 
     steps:
+      # Step 1: Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # Step 2: Install system dependencies for pyenv
       - name: Install pyenv dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential curl libssl-dev zlib1g-dev \
-              libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev \
-              libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev git tar
+          sudo apt-get install -y \
+            build-essential curl libssl-dev zlib1g-dev \
+            libbz2-dev libreadline-dev libsqlite3-dev wget llvm \
+            libncurses5-dev libncursesw5-dev xz-utils tk-dev \
+            libffi-dev liblzma-dev git tar
 
+      # Step 3: Install pyenv
       - name: Install pyenv
         run: curl https://pyenv.run | bash
 
+      # Step 4: Setup pyenv and install Python from .python-version
       - name: Setup Python via pyenv
         shell: bash
         run: |
@@ -40,13 +46,24 @@ jobs:
           export PATH="$PYENV_ROOT/bin:$PATH"
           eval "$(pyenv init -)"
           eval "$(pyenv virtualenv-init -)"
-          pyenv install -s $(cat .python-version)
-          pyenv global $(cat .python-version)
+
+          # Install Python exactly from .python-version
+          PY_VERSION=$(cat .python-version)
+          pyenv install -s $PY_VERSION
+          pyenv global $PY_VERSION
+
           python --version
 
-          # Install pipenv globally
+          # Install pipenv globally for the shell
           python -m pip install --upgrade pip pipenv
 
+          # Add pipenv to PATH for this shell
+          export PATH="$HOME/.local/bin:$PATH"
+
+          # Confirm pipenv is available
+          pipenv --version
+
+      # Step 5: Cache pipenv virtual environment and pip cache
       - name: Cache pipenv dependencies
         uses: actions/cache@v3
         with:
@@ -55,13 +72,19 @@ jobs:
             .cache/pip
           key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile.lock') }}
 
+      # Step 6: Install project dependencies via install.sh
       - name: Install project dependencies
         shell: bash
         run: |
-          # Ensure pipenv is on PATH for this step
-          export PATH="$HOME/.local/bin:$PATH"
+          # Make sure pipenv is available for this step
+          export PYENV_ROOT="$HOME/.pyenv"
+          export PATH="$PYENV_ROOT/bin:$PATH:$HOME/.local/bin"
+          eval "$(pyenv init -)"
+          eval "$(pyenv virtualenv-init -)"
+
           ./scripts/install.sh
 
+      # Step 7: Run code checks
       - name: Run code checks
         shell: bash
         run: make check
