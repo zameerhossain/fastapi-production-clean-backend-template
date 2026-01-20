@@ -22,11 +22,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Setup Python 3.12
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
+      # Step 2: Setup Python and system dependencies in one go
+      - name: Setup Python and system dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y curl build-essential git
+          python -m pip install --upgrade pip pipenv
 
       # Step 3: Cache pipenv virtual environment and pip cache
       - name: Cache pipenv dependencies
@@ -36,21 +36,13 @@ jobs:
             .venv
             .cache/pip
           key: ${{ runner.os }}-pipenv-${{ hashFiles('Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pipenv-
 
-      # Step 4: Install system dependencies
-      - name: Install system dependencies
-        run: |
-          apt-get update
-          apt-get install -y curl build-essential git
-
-      # Step 5: Upgrade pip & install pipenv
-      - name: Install pipenv
-        run: python -m pip install --upgrade pip pipenv
-
-      # Step 6: Install project dependencies
+      # Step 4: Install project dependencies
       - name: Install project dependencies
         run: ./scripts/install.sh
 
-      # Step 7: Run code checks via Makefile
+      # Step 5: Run code checks via Makefile
       - name: Run code checks
         run: make check
