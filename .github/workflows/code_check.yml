@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Step 2: Install pyenv dependencies
+      # Step 2: Install pyenv build dependencies
       - name: Install pyenv build dependencies
         run: |
           sudo apt-get update
@@ -47,8 +47,12 @@ jobs:
           pyenv install -s $(cat .python-version)
           pyenv global $(cat .python-version)
           python --version
-          pip install --upgrade pip pipenv
-          echo "$HOME/.local/bin" >> $GITHUB_PATH  # pipenv path
+
+          # Install pipenv globally
+          python -m pip install --upgrade pip pipenv
+
+          # Ensure pipenv is on PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       # Step 5: Cache pipenv virtual environment and pip cache
       - name: Cache pipenv dependencies
