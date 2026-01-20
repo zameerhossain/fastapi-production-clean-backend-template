@@ -1,0 +1,60 @@
+[MASTER]
+py-version=3.12
+ignore=venv,__pycache__,migrations,.pytest_cache,.git
+load-plugins=
+init-hook=import sys; sys.path.append(".")
+
+jobs=0
+persistent=yes
+
+output-format=colorized
+
+[MESSAGES CONTROL]
+disable=
+    C0114,   # missing-module-docstring
+    C0115,   # missing-class-docstring
+    C0116,   # missing-function-docstring
+    R0903,   # too-few-public-methods (Pydantic models)
+    R0913,   # too-many-arguments (FastAPI endpoints)
+    W0511,   # fixme
+    R1705,   # unnecessary-else-after-return
+    E1101,   # no-member (Pydantic dynamic attrs)
+    W0613,   # unused-argument (FastAPI deps)
+    W1203,   # logging-fstring-interpolation
+    C0103,   # naming style
+    W0703,   # broad-except (we control exception layer)
+    R1720,   # useless-else-on-loop
+    R0801    # duplicate-code (microservice patterns)
+
+[FORMAT]
+max-line-length=120
+indent-string='    '
+
+[TYPECHECK]
+ignored-classes=BaseSettings,BaseModel
+ignore-mixin-members=yes
+ignore-none=yes
+
+[REPORTS]
+reports=no
+score=no
+
+[DESIGN]
+max-args=12
+max-attributes=15
+max-locals=25
+max-returns=10
+max-branches=15
+max-statements=60
+max-nested-blocks=5
+
+[SIMILARITIES]
+min-similarity-lines=6
+ignore-comments=yes
+ignore-docstrings=yes
+
+[LOGGING]
+logging-format-style=old
+
+[EXCEPTIONS]
+overgeneral-exceptions=builtins.Exception,builtins.BaseException

@@ -1,0 +1,80 @@
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pym
+*.pyt
+
+# -----------------------------
+# Virtual Environments
+# -----------------------------
+.venv/
+venv/
+
+
+
+
+# -----------------------------
+# VSCode
+# -----------------------------
+.vscode/
+.history/
+*.code-workspace
+
+# -----------------------------
+# PyCharm
+# -----------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# -----------------------------
+# mypy / type checking
+# -----------------------------
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# -----------------------------
+# pytest / test reports
+# -----------------------------
+htmlcov/
+.coverage
+.tox/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+junit-*.xml
+
+# -----------------------------
+# Docker
+# -----------------------------
+docker-compose.override.yml
+*.dockerignore
+*.log
+**/docker-compose.override.yml
+**/.docker/
+
+# -----------------------------
+# FastAPI / Starlette / general
+# -----------------------------
+*.sqlite3
+*.db
+*.db-journal
+*.pid
+*.sock
+
+# -----------------------------
+# OS-specific
+# -----------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.swp
